@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CubeTimer ✦</title>
+  <title>cubetimer - grego</title>
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" href="cube.png" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -48,6 +50,7 @@
       letter-spacing: 0.08em;
     }
     .logo span { color: var(--muted); }
+    .logo .heart { color: var(--pink); }
 
     .header-right {
       display: flex;
@@ -70,13 +73,37 @@
     .cube-select:hover { border-color: var(--pink-dim); }
     .cube-select option { background: var(--surface2); }
 
+    /* ─── TABS ─── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      gap: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-btn:hover { color: var(--white); }
+    .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink); }
+
     /* ─── MAIN LAYOUT ─── */
     main {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 320px;
       gap: 0;
-      height: calc(100vh - 57px);
+      height: calc(100vh - 100px);
     }
 
     /* ─── TIMER AREA ─── */
@@ -92,7 +119,6 @@
       user-select: none;
     }
 
-    /* subtle radial glow behind timer */
     .timer-area::before {
       content: '';
       position: absolute;
@@ -101,6 +127,21 @@
       background: radial-gradient(circle, rgba(244,114,182,0.06) 0%, transparent 70%);
       pointer-events: none;
     }
+
+    /* cube image bottom-right */
+    .cube-deco {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      opacity: 0.55;
+      pointer-events: none;
+      filter: drop-shadow(0 0 12px rgba(244,114,182,0.25));
+      transition: opacity 0.3s;
+    }
+    .cube-deco:hover { opacity: 0.9; }
 
     .status-hint {
       font-size: 0.78rem;
@@ -138,7 +179,7 @@
       letter-spacing: 0.08em;
     }
 
-    /* ─── STATS ROW ─── */
+    /* ─── STATS ROW (en timer) ─── */
     .stats-row {
       display: flex;
       gap: 2.5rem;
@@ -170,12 +211,17 @@
       overflow: hidden;
     }
 
+    /* PESTAÑA TIEMPOS */
+    .panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .panel.active { display: flex; }
+
     .sidebar-header {
       padding: 1.2rem 1.5rem;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     .sidebar-title {
       font-size: 0.78rem;
@@ -207,10 +253,10 @@
 
     .time-entry {
       display: grid;
-      grid-template-columns: 30px 1fr auto;
+      grid-template-columns: 28px 1fr auto auto;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.55rem 1.5rem;
+      gap: 0.4rem;
+      padding: 0.55rem 1.5rem 0.55rem 1rem;
       transition: background 0.15s;
       position: relative;
     }
@@ -236,6 +282,15 @@
       font-size: 0.92rem;
       color: var(--white);
     }
+    .entry-cube {
+      font-size: 0.68rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      font-family: 'Space Mono', monospace;
+    }
     .entry-del {
       background: none;
       border: none;
@@ -259,8 +314,64 @@
       gap: 0.75rem;
       color: var(--muted);
       font-size: 0.85rem;
+      padding: 2rem;
+      text-align: center;
     }
     .empty-icon { font-size: 2rem; opacity: 0.4; }
+
+    /* PESTAÑA ESTADÍSTICAS */
+    .stats-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.5rem;
+    }
+    .stats-panel::-webkit-scrollbar { width: 4px; }
+    .stats-panel::-webkit-scrollbar-track { background: transparent; }
+    .stats-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .stats-cube-section {
+      margin-bottom: 1.5rem;
+    }
+    .stats-cube-title {
+      font-size: 0.72rem;
+      color: var(--pink);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .stats-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .stats-card-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .stats-card-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--white);
+    }
+    .stats-card-value.pink { color: var(--pink); }
+    .stats-card-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
 
     /* ─── MOBILE ─── */
     @media (max-width: 680px) {
@@ -268,7 +379,7 @@
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
         height: auto;
-        min-height: calc(100vh - 57px);
+        min-height: calc(100vh - 100px);
       }
       .timer-area {
         border-right: none;
@@ -282,7 +393,7 @@
 <body>
 
 <header>
-  <div class="logo">cube<span>timer</span> ✦</div>
+  <div class="logo">cube<span>timer</span> <span style="font-size:0.8em;color:var(--muted)">grego</span> <span class="heart">&lt;3</span></div>
   <div class="header-right">
     <select class="cube-select" id="cubeType">
       <option value="3x3">3×3</option>
@@ -295,78 +406,73 @@
   </div>
 </header>
 
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="tiempos">tiempos</button>
+  <button class="tab-btn" data-tab="estadisticas">estadísticas</button>
+</div>
+
 <main>
   <!-- TIMER -->
   <section class="timer-area" id="timerArea">
-    <div class="status-hint" id="statusHint">mantén espacio para preparar</div>
+    <div class="status-hint" id="statusHint">mantén espacio presionado para preparar</div>
 
-    <div class="timer-display" id="timerDisplay">
-      0.000
-    </div>
-
-    <div class="stats-row" id="statsRow">
-      <div class="stat-item">
-        <span class="stat-label">Mejor</span>
-        <span class="stat-value best" id="statBest">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Ao5</span>
-        <span class="stat-value" id="statAo5">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Ao12</span>
-        <span class="stat-value" id="statAo12">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Media</span>
-        <span class="stat-value" id="statMean">—</span>
-      </div>
-    </div>
+    <div class="timer-display" id="timerDisplay">0<span class="timer-ms">.000</span></div>
 
     <div class="spacebar-hint" id="spacebarHint">espacio · toca pantalla en móvil</div>
+
+    <!-- imagen cubo decorativa — reemplazá "cube.png" por tu archivo -->
+    <img class="cube-deco" src="cube.png" alt="cubo" onerror="this.style.display='none'" />
   </section>
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <span class="sidebar-title" id="sidebarTitle">tiempos</span>
-      <button class="clear-btn" id="clearBtn">limpiar</button>
-    </div>
-    <div class="times-list" id="timesList">
-      <div class="empty-state" id="emptyState">
-        <span class="empty-icon">⏱</span>
-        <span>sin tiempos aún</span>
+
+    <!-- PANEL TIEMPOS -->
+    <div class="panel active" id="panel-tiempos">
+      <div class="sidebar-header">
+        <span class="sidebar-title" id="sidebarTitle">tiempos</span>
+        <button class="clear-btn" id="clearBtn">limpiar</button>
       </div>
+      <div class="times-list" id="timesList"></div>
     </div>
+
+    <!-- PANEL ESTADÍSTICAS -->
+    <div class="panel" id="panel-estadisticas">
+      <div class="sidebar-header">
+        <span class="sidebar-title">estadísticas por cubo</span>
+      </div>
+      <div class="stats-panel" id="statsPanel"></div>
+    </div>
+
   </aside>
 </main>
 
 <script>
   // ─── STATE ───
+  // times: array of { ms, cube }
   const state = {
-    times: JSON.parse(localStorage.getItem('ct_times') || '[]'),
-    status: 'idle',   // idle | holding | ready | timing
+    times: JSON.parse(localStorage.getItem('ct_times_v2') || '[]'),
+    status: 'idle',
     startTime: 0,
     elapsed: 0,
     holdTimer: null,
     rafId: null,
+    activeTab: 'tiempos',
   };
 
-  const HOLD_MS = 550; // how long to hold space before "ready"
+  const HOLD_MS = 550;
+  const CUBES = ['3x3','2x2','4x4','5x5','OH','Pyraminx'];
 
   // ─── ELEMENTS ───
-  const display   = document.getElementById('timerDisplay');
-  const hint      = document.getElementById('statusHint');
-  const spHint    = document.getElementById('spacebarHint');
-  const timesList = document.getElementById('timesList');
-  const emptyState= document.getElementById('emptyState');
-  const clearBtn  = document.getElementById('clearBtn');
+  const display    = document.getElementById('timerDisplay');
+  const hint       = document.getElementById('statusHint');
+  const spHint     = document.getElementById('spacebarHint');
+  const timesList  = document.getElementById('timesList');
+  const clearBtn   = document.getElementById('clearBtn');
   const sidebarTitle = document.getElementById('sidebarTitle');
-
-  const statBest = document.getElementById('statBest');
-  const statAo5  = document.getElementById('statAo5');
-  const statAo12 = document.getElementById('statAo12');
-  const statMean = document.getElementById('statMean');
+  const cubeSelect = document.getElementById('cubeType');
+  const statsPanel = document.getElementById('statsPanel');
 
   // ─── FORMAT ───
   function fmt(ms) {
@@ -382,7 +488,7 @@
   function fmtDisplay(ms) {
     const s = fmt(ms);
     const dot = s.lastIndexOf('.');
-    if (dot === -1) return `<span>${s}</span>`;
+    if (dot === -1) return `${s}`;
     return `${s.slice(0, dot)}<span class="timer-ms">.${s.slice(dot+1)}</span>`;
   }
 
@@ -394,53 +500,47 @@
     const trimmed = sorted.slice(1, -1);
     return trimmed.reduce((a,b) => a+b, 0) / trimmed.length;
   }
-
   function mean(arr) {
     if (!arr.length) return null;
     return arr.reduce((a,b) => a+b, 0) / arr.length;
   }
-
   function best(arr) {
     if (!arr.length) return null;
     return Math.min(...arr);
   }
 
-  // ─── RENDER STATS ───
-  function renderStats() {
-    const t = state.times;
-    statBest.textContent = fmt(best(t));
-    const a5  = ao(t, 5);
-    const a12 = ao(t, 12);
-    const m   = mean(t);
-    statAo5.textContent  = a5  !== null ? fmt(a5)  : '—';
-    statAo12.textContent = a12 !== null ? fmt(a12) : '—';
-    statMean.textContent = m   !== null ? fmt(m)   : '—';
-    sidebarTitle.textContent = t.length ? `tiempos (${t.length})` : 'tiempos';
-  }
-
   // ─── RENDER LIST ───
   function renderList() {
-    if (!state.times.length) {
-      timesList.innerHTML = '';
-      timesList.appendChild(emptyState);
+    const t = state.times;
+    const title = t.length ? `tiempos (${t.length})` : 'tiempos';
+    sidebarTitle.textContent = title;
+
+    if (!t.length) {
+      timesList.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">⏱</span>
+          <span>sin tiempos aún<br><small style="color:var(--muted);font-size:0.75rem">mantén espacio presionado para preparar</small></span>
+        </div>`;
       return;
     }
-    const bestVal = best(state.times);
+
+    const bestVal = best(t.map(x => x.ms));
     timesList.innerHTML = '';
-    const reversed = [...state.times].reverse();
-    reversed.forEach((t, i) => {
-      const realIdx = state.times.length - 1 - i;
-      const isBest  = t === bestVal;
+    const reversed = [...t].reverse();
+    reversed.forEach((entry, i) => {
+      const realIdx = t.length - 1 - i;
+      const isBest  = entry.ms === bestVal;
       const el = document.createElement('div');
       el.className = 'time-entry' + (isBest ? ' is-best' : '');
       el.innerHTML = `
-        <span class="entry-num">${state.times.length - i}</span>
-        <span class="entry-time">${fmt(t)}</span>
+        <span class="entry-num">${t.length - i}</span>
+        <span class="entry-time">${fmt(entry.ms)}</span>
+        <span class="entry-cube">${entry.cube}</span>
         <button class="entry-del" data-idx="${realIdx}" title="eliminar">✕</button>
       `;
       timesList.appendChild(el);
     });
-    // delete handlers
+
     timesList.querySelectorAll('.entry-del').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
@@ -451,9 +551,69 @@
     });
   }
 
-  function save() {
-    localStorage.setItem('ct_times', JSON.stringify(state.times));
+  // ─── RENDER STATS ───
+  function renderStats() {
+    statsPanel.innerHTML = '';
+    const hasTimes = state.times.length > 0;
+    if (!hasTimes) {
+      statsPanel.innerHTML = `<div class="empty-state"><span class="empty-icon">📊</span><span>sin tiempos aún</span></div>`;
+      return;
+    }
+
+    CUBES.forEach(cube => {
+      const times = state.times.filter(x => x.cube === cube).map(x => x.ms);
+      if (!times.length) return;
+
+      const b   = best(times);
+      const a5  = ao(times, 5);
+      const a12 = ao(times, 12);
+      const m   = mean(times);
+
+      const section = document.createElement('div');
+      section.className = 'stats-cube-section';
+      section.innerHTML = `
+        <div class="stats-cube-title">${cube} <span style="color:var(--muted);font-weight:400">(${times.length} solve${times.length !== 1 ? 's' : ''})</span></div>
+        <div class="stats-grid">
+          <div class="stats-card">
+            <span class="stats-card-label">Mejor</span>
+            <span class="stats-card-value pink">${fmt(b)}</span>
+          </div>
+          <div class="stats-card">
+            <span class="stats-card-label">Media</span>
+            <span class="stats-card-value">${fmt(m)}</span>
+          </div>
+          <div class="stats-card">
+            <span class="stats-card-label">Ao5</span>
+            <span class="stats-card-value">${a5 !== null ? fmt(a5) : '—'}</span>
+            ${a5 === null ? `<span class="stats-card-sub">necesitás 5 solves</span>` : ''}
+          </div>
+          <div class="stats-card">
+            <span class="stats-card-label">Ao12</span>
+            <span class="stats-card-value">${a12 !== null ? fmt(a12) : '—'}</span>
+            ${a12 === null ? `<span class="stats-card-sub">necesitás 12 solves</span>` : ''}
+          </div>
+        </div>
+      `;
+      statsPanel.appendChild(section);
+    });
   }
+
+  function save() {
+    localStorage.setItem('ct_times_v2', JSON.stringify(state.times));
+  }
+
+  // ─── TABS ───
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      state.activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + tab).classList.add('active');
+      if (tab === 'estadisticas') renderStats();
+    });
+  });
 
   // ─── TIMER LOOP ───
   function tick() {
@@ -462,17 +622,13 @@
     state.rafId = requestAnimationFrame(tick);
   }
 
-  // ─── TRANSITIONS ───
   function setClass(cls) {
     display.className = 'timer-display' + (cls ? ' '+cls : '');
     hint.className    = 'status-hint'   + (cls ? ' '+cls : '');
   }
 
   function startHolding() {
-    if (state.status === 'timing') {
-      stopTimer();
-      return;
-    }
+    if (state.status === 'timing') { stopTimer(); return; }
     if (state.status !== 'idle') return;
     state.status = 'holding';
     setClass('set');
@@ -491,7 +647,7 @@
       clearTimeout(state.holdTimer);
       state.status = 'idle';
       setClass('');
-      hint.textContent = 'mantén espacio para preparar';
+      hint.textContent = 'mantén espacio presionado para preparar';
     } else if (state.status === 'ready') {
       startTimer();
     }
@@ -509,58 +665,58 @@
   function stopTimer() {
     cancelAnimationFrame(state.rafId);
     state.elapsed = performance.now() - state.startTime;
-    state.times.push(Math.round(state.elapsed));
+    const cube = cubeSelect.value;
+    state.times.push({ ms: Math.round(state.elapsed), cube });
     save();
     state.status = 'idle';
     display.innerHTML = fmtDisplay(state.elapsed);
     setClass('');
-    hint.textContent = 'mantén espacio para preparar';
+    hint.textContent = 'mantén espacio presionado para preparar';
     spHint.textContent = 'espacio · toca pantalla en móvil';
     renderList();
-    renderStats();
+    if (state.activeTab === 'estadisticas') renderStats();
   }
 
-  // ─── EVENTS: keyboard ───
+  // ─── KEYBOARD ───
   document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && !e.repeat) {
-      e.preventDefault();
-      startHolding();
-    }
+    if (e.code === 'Space' && !e.repeat) { e.preventDefault(); startHolding(); }
   });
   document.addEventListener('keyup', e => {
-    if (e.code === 'Space') {
-      e.preventDefault();
-      releaseHolding();
-    }
+    if (e.code === 'Space') { e.preventDefault(); releaseHolding(); }
   });
 
-  // ─── EVENTS: touch / click on timer area ───
+  // ─── TOUCH ───
   const timerArea = document.getElementById('timerArea');
   timerArea.addEventListener('pointerdown', e => {
-    if (e.target.closest('select, button')) return;
+    if (e.target.closest('select, button, img')) return;
     startHolding();
   });
   timerArea.addEventListener('pointerup', e => {
-    if (e.target.closest('select, button')) return;
+    if (e.target.closest('select, button, img')) return;
     releaseHolding();
   });
 
   // ─── CLEAR ───
   clearBtn.addEventListener('click', () => {
     if (!state.times.length) return;
-    if (confirm('¿Limpiar todos los tiempos?')) {
+    const cube = cubeSelect.value;
+    const cubeCount = state.times.filter(x => x.cube === cube).length;
+    const msg = cubeCount < state.times.length
+      ? `¿Limpiar solo los tiempos de ${cube} o todos?\n\nOK = todos | Cancelar = solo ${cube}`
+      : `¿Limpiar todos los tiempos de ${cube}?`;
+    if (confirm(msg)) {
       state.times = [];
-      save();
-      display.innerHTML = '0<span class="timer-ms">.000</span>';
-      renderList();
-      renderStats();
+    } else {
+      state.times = state.times.filter(x => x.cube !== cube);
     }
+    save();
+    display.innerHTML = '0<span class="timer-ms">.000</span>';
+    renderList();
+    renderStats();
   });
 
   // ─── INIT ───
   renderList();
-  renderStats();
-  display.innerHTML = '0<span class="timer-ms">.000</span>';
 </script>
 </body>
 </html>
