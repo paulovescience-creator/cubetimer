@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CubeTimer ✦</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0d0d0f;
+      --surface:   #161619;
+      --surface2:  #1e1e23;
+      --border:    #2a2a32;
+      --pink:      #f472b6;
+      --pink-dim:  #9d3f6e;
+      --white:     #f8f8f8;
+      --muted:     #6b6b7e;
+      --green:     #86efac;
+      --red:       #f87171;
+      --yellow:    #fbbf24;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--pink);
+      letter-spacing: 0.08em;
+    }
+    .logo span { color: var(--muted); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .cube-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .cube-select:hover { border-color: var(--pink-dim); }
+    .cube-select option { background: var(--surface2); }
+
+    /* ─── MAIN LAYOUT ─── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 0;
+      height: calc(100vh - 57px);
+    }
+
+    /* ─── TIMER AREA ─── */
+    .timer-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+      user-select: none;
+    }
+
+    /* subtle radial glow behind timer */
+    .timer-area::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,114,182,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .status-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .status-hint.ready  { color: var(--green); }
+    .status-hint.set    { color: var(--yellow); }
+    .status-hint.timing { color: var(--pink); }
+
+    .timer-display {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(4rem, 10vw, 7rem);
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -0.02em;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .timer-display.ready  { color: var(--green); }
+    .timer-display.set    { color: var(--yellow); }
+    .timer-display.timing { color: var(--pink); }
+
+    .timer-ms {
+      font-size: 0.45em;
+      color: var(--muted);
+      vertical-align: baseline;
+    }
+
+    .spacebar-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ─── STATS ROW ─── */
+    .stats-row {
+      display: flex;
+      gap: 2.5rem;
+      margin-top: 0.5rem;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.05rem;
+      color: var(--white);
+    }
+    .stat-value.best { color: var(--pink); }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-title {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .clear-btn {
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .clear-btn:hover { color: var(--red); background: rgba(248,113,113,0.08); }
+
+    .times-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+    .times-list::-webkit-scrollbar { width: 4px; }
+    .times-list::-webkit-scrollbar-track { background: transparent; }
+    .times-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .time-entry {
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.5rem;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .time-entry:hover { background: var(--surface2); }
+    .time-entry.is-best .entry-time { color: var(--pink); }
+    .time-entry.is-best::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--pink);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .entry-num {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      text-align: right;
+    }
+    .entry-time {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.92rem;
+      color: var(--white);
+    }
+    .entry-del {
+      background: none;
+      border: none;
+      color: transparent;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.3rem;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .time-entry:hover .entry-del { color: var(--muted); }
+    .entry-del:hover { color: var(--red) !important; background: rgba(248,113,113,0.1); }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .empty-icon { font-size: 2rem; opacity: 0.4; }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 680px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+        min-height: calc(100vh - 57px);
+      }
+      .timer-area {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 3rem 1.5rem;
+      }
+      .sidebar { height: 40vh; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">cube<span>timer</span> ✦</div>
+  <div class="header-right">
+    <select class="cube-select" id="cubeType">
+      <option value="3x3">3×3</option>
+      <option value="2x2">2×2</option>
+      <option value="4x4">4×4</option>
+      <option value="5x5">5×5</option>
+      <option value="OH">One-Hand</option>
+      <option value="Pyraminx">Pyraminx</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <!-- TIMER -->
+  <section class="timer-area" id="timerArea">
+    <div class="status-hint" id="statusHint">mantén espacio para preparar</div>
+
+    <div class="timer-display" id="timerDisplay">
+      0.000
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-item">
+        <span class="stat-label">Mejor</span>
+        <span class="stat-value best" id="statBest">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Ao5</span>
+        <span class="stat-value" id="statAo5">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Ao12</span>
+        <span class="stat-value" id="statAo12">—</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Media</span>
+        <span class="stat-value" id="statMean">—</span>
+      </div>
+    </div>
+
+    <div class="spacebar-hint" id="spacebarHint">espacio · toca pantalla en móvil</div>
+  </section>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title" id="sidebarTitle">tiempos</span>
+      <button class="clear-btn" id="clearBtn">limpiar</button>
+    </div>
+    <div class="times-list" id="timesList">
+      <div class="empty-state" id="emptyState">
+        <span class="empty-icon">⏱</span>
+        <span>sin tiempos aún</span>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  // ─── STATE ───
+  const state = {
+    times: JSON.parse(localStorage.getItem('ct_times') || '[]'),
+    status: 'idle',   // idle | holding | ready | timing
+    startTime: 0,
+    elapsed: 0,
+    holdTimer: null,
+    rafId: null,
+  };
+
+  const HOLD_MS = 550; // how long to hold space before "ready"
+
+  // ─── ELEMENTS ───
+  const display   = document.getElementById('timerDisplay');
+  const hint      = document.getElementById('statusHint');
+  const spHint    = document.getElementById('spacebarHint');
+  const timesList = document.getElementById('timesList');
+  const emptyState= document.getElementById('emptyState');
+  const clearBtn  = document.getElementById('clearBtn');
+  const sidebarTitle = document.getElementById('sidebarTitle');
+
+  const statBest = document.getElementById('statBest');
+  const statAo5  = document.getElementById('statAo5');
+  const statAo12 = document.getElementById('statAo12');
+  const statMean = document.getElementById('statMean');
+
+  // ─── FORMAT ───
+  function fmt(ms) {
+    if (ms === null || ms === undefined) return '—';
+    if (ms >= 60000) {
+      const m = Math.floor(ms / 60000);
+      const s = ((ms % 60000) / 1000).toFixed(2).padStart(5, '0');
+      return `${m}:${s}`;
+    }
+    return (ms / 1000).toFixed(3);
+  }
+
+  function fmtDisplay(ms) {
+    const s = fmt(ms);
+    const dot = s.lastIndexOf('.');
+    if (dot === -1) return `<span>${s}</span>`;
+    return `${s.slice(0, dot)}<span class="timer-ms">.${s.slice(dot+1)}</span>`;
+  }
+
+  // ─── AO CALC ───
+  function ao(arr, n) {
+    if (arr.length < n) return null;
+    const slice = arr.slice(-n);
+    const sorted = [...slice].sort((a,b) => a-b);
+    const trimmed = sorted.slice(1, -1);
+    return trimmed.reduce((a,b) => a+b, 0) / trimmed.length;
+  }
+
+  function mean(arr) {
+    if (!arr.length) return null;
+    return arr.reduce((a,b) => a+b, 0) / arr.length;
+  }
+
+  function best(arr) {
+    if (!arr.length) return null;
+    return Math.min(...arr);
+  }
+
+  // ─── RENDER STATS ───
+  function renderStats() {
+    const t = state.times;
+    statBest.textContent = fmt(best(t));
+    const a5  = ao(t, 5);
+    const a12 = ao(t, 12);
+    const m   = mean(t);
+    statAo5.textContent  = a5  !== null ? fmt(a5)  : '—';
+    statAo12.textContent = a12 !== null ? fmt(a12) : '—';
+    statMean.textContent = m   !== null ? fmt(m)   : '—';
+    sidebarTitle.textContent = t.length ? `tiempos (${t.length})` : 'tiempos';
+  }
+
+  // ─── RENDER LIST ───
+  function renderList() {
+    if (!state.times.length) {
+      timesList.innerHTML = '';
+      timesList.appendChild(emptyState);
+      return;
+    }
+    const bestVal = best(state.times);
+    timesList.innerHTML = '';
+    const reversed = [...state.times].reverse();
+    reversed.forEach((t, i) => {
+      const realIdx = state.times.length - 1 - i;
+      const isBest  = t === bestVal;
+      const el = document.createElement('div');
+      el.className = 'time-entry' + (isBest ? ' is-best' : '');
+      el.innerHTML = `
+        <span class="entry-num">${state.times.length - i}</span>
+        <span class="entry-time">${fmt(t)}</span>
+        <button class="entry-del" data-idx="${realIdx}" title="eliminar">✕</button>
+      `;
+      timesList.appendChild(el);
+    });
+    // delete handlers
+    timesList.querySelectorAll('.entry-del').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.idx);
+        state.times.splice(idx, 1);
+        save(); renderList(); renderStats();
+      });
+    });
+  }
+
+  function save() {
+    localStorage.setItem('ct_times', JSON.stringify(state.times));
+  }
+
+  // ─── TIMER LOOP ───
+  function tick() {
+    state.elapsed = performance.now() - state.startTime;
+    display.innerHTML = fmtDisplay(state.elapsed);
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  // ─── TRANSITIONS ───
+  function setClass(cls) {
+    display.className = 'timer-display' + (cls ? ' '+cls : '');
+    hint.className    = 'status-hint'   + (cls ? ' '+cls : '');
+  }
+
+  function startHolding() {
+    if (state.status === 'timing') {
+      stopTimer();
+      return;
+    }
+    if (state.status !== 'idle') return;
+    state.status = 'holding';
+    setClass('set');
+    hint.textContent = 'preparando…';
+    state.holdTimer = setTimeout(() => {
+      if (state.status === 'holding') {
+        state.status = 'ready';
+        setClass('ready');
+        hint.textContent = 'listo — suelta para iniciar';
+      }
+    }, HOLD_MS);
+  }
+
+  function releaseHolding() {
+    if (state.status === 'holding') {
+      clearTimeout(state.holdTimer);
+      state.status = 'idle';
+      setClass('');
+      hint.textContent = 'mantén espacio para preparar';
+    } else if (state.status === 'ready') {
+      startTimer();
+    }
+  }
+
+  function startTimer() {
+    state.status    = 'timing';
+    state.startTime = performance.now();
+    setClass('timing');
+    hint.textContent = 'corriendo…';
+    spHint.textContent = 'toca para detener';
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  function stopTimer() {
+    cancelAnimationFrame(state.rafId);
+    state.elapsed = performance.now() - state.startTime;
+    state.times.push(Math.round(state.elapsed));
+    save();
+    state.status = 'idle';
+    display.innerHTML = fmtDisplay(state.elapsed);
+    setClass('');
+    hint.textContent = 'mantén espacio para preparar';
+    spHint.textContent = 'espacio · toca pantalla en móvil';
+    renderList();
+    renderStats();
+  }
+
+  // ─── EVENTS: keyboard ───
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !e.repeat) {
+      e.preventDefault();
+      startHolding();
+    }
+  });
+  document.addEventListener('keyup', e => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      releaseHolding();
+    }
+  });
+
+  // ─── EVENTS: touch / click on timer area ───
+  const timerArea = document.getElementById('timerArea');
+  timerArea.addEventListener('pointerdown', e => {
+    if (e.target.closest('select, button')) return;
+    startHolding();
+  });
+  timerArea.addEventListener('pointerup', e => {
+    if (e.target.closest('select, button')) return;
+    releaseHolding();
+  });
+
+  // ─── CLEAR ───
+  clearBtn.addEventListener('click', () => {
+    if (!state.times.length) return;
+    if (confirm('¿Limpiar todos los tiempos?')) {
+      state.times = [];
+      save();
+      display.innerHTML = '0<span class="timer-ms">.000</span>';
+      renderList();
+      renderStats();
+    }
+  });
+
+  // ─── INIT ───
+  renderList();
+  renderStats();
+  display.innerHTML = '0<span class="timer-ms">.000</span>';
+</script>
+</body>
+</html>
