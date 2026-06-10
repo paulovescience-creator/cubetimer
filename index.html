@@ -396,12 +396,10 @@
   <div class="logo">cube<span>timer</span> <span style="font-size:1em;color:var(--pink)">grego</span> <span class="heart">&lt;3</span></div>
   <div class="header-right">
     <select class="cube-select" id="cubeType">
-      <option value="3x3">3×3</option>
       <option value="2x2">2×2</option>
+      <option value="3x3">3×3</option>
       <option value="4x4">4×4</option>
       <option value="5x5">5×5</option>
-      <option value="OH">One-Hand</option>
-      <option value="Pyraminx">Pyraminx</option>
     </select>
   </div>
 </header>
@@ -462,7 +460,7 @@
   };
 
   const HOLD_MS = 550;
-  const CUBES = ['3x3','2x2','4x4','5x5','OH','Pyraminx'];
+  const CUBES = ['2x2','3x3','4x4','5x5'];
 
   // ─── ELEMENTS ───
   const display    = document.getElementById('timerDisplay');
