@@ -286,10 +286,11 @@
   <div class="header-right">
     <div class="sync-dot" id="syncDot" title="estado de sincronización"></div>
     <select class="cube-select" id="cubeType">
-      <option value="3x3">3×3</option>
       <option value="2x2">2×2</option>
+      <option value="3x3">3×3</option>
       <option value="4x4">4×4</option>
       <option value="5x5">5×5</option>
+      <option value="tester">tester</option>
     </select>
   </div>
 </header>
@@ -358,7 +359,7 @@
   };
 
   const HOLD_MS = 550;
-  const CUBES = ['3x3','2x2','4x4','5x5'];
+  const CUBES = ['2x2','3x3','4x4','5x5','tester'];
 
   // ─── ELEMENTS ───
   const display      = document.getElementById('timerDisplay');
