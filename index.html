@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>cubetimer - grego</title>
-  <!-- FAVICON -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='75'>🩷</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='70'>🩷</text></svg>" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -42,7 +41,6 @@
       padding: 1.2rem 2rem;
       border-bottom: 1px solid var(--border);
     }
-
     .logo {
       font-family: 'Space Mono', monospace;
       font-size: 1rem;
@@ -51,12 +49,7 @@
     }
     .logo span { color: var(--muted); }
     .logo .heart { color: var(--pink); }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
 
     .cube-select {
       background: var(--surface2);
@@ -73,12 +66,23 @@
     .cube-select:hover { border-color: var(--pink-dim); }
     .cube-select option { background: var(--surface2); }
 
+    /* sync indicator */
+    .sync-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .sync-dot.syncing  { background: var(--yellow); }
+    .sync-dot.synced   { background: var(--green); }
+    .sync-dot.error    { background: var(--red); }
+
     /* ─── TABS ─── */
     .tabs {
       display: flex;
       border-bottom: 1px solid var(--border);
       padding: 0 2rem;
-      gap: 0;
     }
     .tab-btn {
       background: none;
@@ -102,7 +106,6 @@
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 320px;
-      gap: 0;
       height: calc(100vh - 100px);
     }
 
@@ -118,7 +121,6 @@
       position: relative;
       user-select: none;
     }
-
     .timer-area::before {
       content: '';
       position: absolute;
@@ -127,14 +129,10 @@
       background: radial-gradient(circle, rgba(244,114,182,0.06) 0%, transparent 70%);
       pointer-events: none;
     }
-
-    /* cube image bottom-right */
     .cube-deco {
       position: absolute;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      width: 180px;
-      height: 180px;
+      bottom: 1.5rem; right: 1.5rem;
+      width: 80px; height: 80px;
       object-fit: contain;
       opacity: 0.55;
       pointer-events: none;
@@ -166,52 +164,12 @@
     .timer-display.ready  { color: var(--green); }
     .timer-display.set    { color: var(--yellow); }
     .timer-display.timing { color: var(--pink); }
+    .timer-ms { font-size: 0.45em; color: var(--muted); vertical-align: baseline; }
 
-    .timer-ms {
-      font-size: 0.45em;
-      color: var(--muted);
-      vertical-align: baseline;
-    }
-
-    .spacebar-hint {
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    /* ─── STATS ROW (en timer) ─── */
-    .stats-row {
-      display: flex;
-      gap: 2.5rem;
-      margin-top: 0.5rem;
-    }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .stat-value {
-      font-family: 'Space Mono', monospace;
-      font-size: 1.05rem;
-      color: var(--white);
-    }
-    .stat-value.best { color: var(--pink); }
+    .spacebar-hint { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.08em; }
 
     /* ─── SIDEBAR ─── */
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* PESTAÑA TIEMPOS */
+    .sidebar { display: flex; flex-direction: column; overflow: hidden; }
     .panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
     .panel.active { display: flex; }
 
@@ -223,30 +181,17 @@
       justify-content: space-between;
       flex-shrink: 0;
     }
-    .sidebar-title {
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
+    .sidebar-title { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
     .clear-btn {
-      font-size: 0.72rem;
-      color: var(--muted);
-      background: none;
-      border: none;
-      cursor: pointer;
+      font-size: 0.72rem; color: var(--muted);
+      background: none; border: none; cursor: pointer;
       font-family: 'DM Sans', sans-serif;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+      padding: 0.25rem 0.5rem; border-radius: 4px;
       transition: color 0.2s, background 0.2s;
     }
     .clear-btn:hover { color: var(--red); background: rgba(248,113,113,0.08); }
 
-    .times-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.5rem 0;
-    }
+    .times-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
     .times-list::-webkit-scrollbar { width: 4px; }
     .times-list::-webkit-scrollbar-track { background: transparent; }
     .times-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -263,170 +208,106 @@
     .time-entry:hover { background: var(--surface2); }
     .time-entry.is-best .entry-time { color: var(--pink); }
     .time-entry.is-best::before {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       left: 0; top: 0; bottom: 0;
-      width: 2px;
-      background: var(--pink);
-      border-radius: 0 2px 2px 0;
+      width: 2px; background: var(--pink); border-radius: 0 2px 2px 0;
     }
-
-    .entry-num {
-      font-size: 0.72rem;
-      color: var(--muted);
-      font-family: 'Space Mono', monospace;
-      text-align: right;
-    }
-    .entry-time {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.92rem;
-      color: var(--white);
-    }
+    .entry-num { font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; text-align: right; }
+    .entry-time { font-family: 'Space Mono', monospace; font-size: 0.92rem; color: var(--white); }
     .entry-cube {
-      font-size: 0.68rem;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.1rem 0.35rem;
+      font-size: 0.68rem; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 0.1rem 0.35rem;
       font-family: 'Space Mono', monospace;
     }
     .entry-del {
-      background: none;
-      border: none;
-      color: transparent;
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 0.2rem 0.3rem;
-      border-radius: 4px;
-      transition: color 0.15s, background 0.15s;
-      line-height: 1;
+      background: none; border: none; color: transparent;
+      cursor: pointer; font-size: 0.8rem; padding: 0.2rem 0.3rem;
+      border-radius: 4px; transition: color 0.15s, background 0.15s; line-height: 1;
     }
     .time-entry:hover .entry-del { color: var(--muted); }
     .entry-del:hover { color: var(--red) !important; background: rgba(248,113,113,0.1); }
 
     .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 0.75rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      padding: 2rem;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100%;
+      gap: 0.75rem; color: var(--muted); font-size: 0.85rem;
+      padding: 2rem; text-align: center;
     }
     .empty-icon { font-size: 2rem; opacity: 0.4; }
 
-    /* PESTAÑA ESTADÍSTICAS */
-    .stats-panel {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem 1.5rem;
-    }
+    /* STATS PANEL */
+    .stats-panel { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
     .stats-panel::-webkit-scrollbar { width: 4px; }
     .stats-panel::-webkit-scrollbar-track { background: transparent; }
     .stats-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .stats-cube-section {
-      margin-bottom: 1.5rem;
-    }
+    .stats-cube-section { margin-bottom: 1.5rem; }
     .stats-cube-title {
-      font-size: 0.72rem;
-      color: var(--pink);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      font-size: 0.72rem; color: var(--pink);
+      letter-spacing: 0.12em; text-transform: uppercase;
       font-family: 'Space Mono', monospace;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem; padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--border);
     }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
     .stats-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem;
+      display: flex; flex-direction: column; gap: 0.2rem;
     }
-    .stats-card-label {
-      font-size: 0.65rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .stats-card-value {
-      font-family: 'Space Mono', monospace;
-      font-size: 1rem;
-      color: var(--white);
-    }
+    .stats-card-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .stats-card-value { font-family: 'Space Mono', monospace; font-size: 1rem; color: var(--white); }
     .stats-card-value.pink { color: var(--pink); }
-    .stats-card-sub {
-      font-size: 0.68rem;
-      color: var(--muted);
+    .stats-card-sub { font-size: 0.68rem; color: var(--muted); }
+
+    /* loading overlay */
+    .loading-bar {
+      height: 2px;
+      background: linear-gradient(90deg, var(--pink), transparent);
+      width: 0%;
+      transition: width 0.4s;
+      position: fixed;
+      top: 0; left: 0;
     }
 
-    /* ─── MOBILE ─── */
     @media (max-width: 680px) {
-      main {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        height: auto;
-        min-height: calc(100vh - 100px);
-      }
-      .timer-area {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 3rem 1.5rem;
-      }
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; min-height: calc(100vh - 100px); }
+      .timer-area { border-right: none; border-bottom: 1px solid var(--border); padding: 3rem 1.5rem; }
       .sidebar { height: 40vh; }
     }
   </style>
 </head>
 <body>
 
+<div class="loading-bar" id="loadingBar"></div>
+
 <header>
-  <div class="logo">cube<span>timer</span> <span style="font-size:1em;color:var(--pink)">grego</span> <span class="heart">&lt;3</span></div>
+  <div class="logo">cube<span>timer</span> <span style="color:var(--pink)">grego</span> <span class="heart">&lt;3</span></div>
   <div class="header-right">
+    <div class="sync-dot" id="syncDot" title="estado de sincronización"></div>
     <select class="cube-select" id="cubeType">
-      <option value="2x2">2×2</option>
       <option value="3x3">3×3</option>
+      <option value="2x2">2×2</option>
       <option value="4x4">4×4</option>
       <option value="5x5">5×5</option>
     </select>
   </div>
 </header>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab-btn active" data-tab="tiempos">tiempos</button>
   <button class="tab-btn" data-tab="estadisticas">estadísticas</button>
 </div>
 
 <main>
-  <!-- TIMER -->
   <section class="timer-area" id="timerArea">
     <div class="status-hint" id="statusHint">mantén espacio presionado para preparar</div>
-
     <div class="timer-display" id="timerDisplay">0<span class="timer-ms">.000</span></div>
-
     <div class="spacebar-hint" id="spacebarHint">espacio · toca pantalla en móvil</div>
-
-    <!-- imagen cubo decorativa — reemplazá "cube.png" por tu archivo -->
     <img class="cube-deco" src="cube.png" alt="cubo" onerror="this.style.display='none'" />
   </section>
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-
-    <!-- PANEL TIEMPOS -->
     <div class="panel active" id="panel-tiempos">
       <div class="sidebar-header">
         <span class="sidebar-title" id="sidebarTitle">tiempos</span>
@@ -434,23 +315,40 @@
       </div>
       <div class="times-list" id="timesList"></div>
     </div>
-
-    <!-- PANEL ESTADÍSTICAS -->
     <div class="panel" id="panel-estadisticas">
       <div class="sidebar-header">
         <span class="sidebar-title">estadísticas por cubo</span>
       </div>
       <div class="stats-panel" id="statsPanel"></div>
     </div>
-
   </aside>
 </main>
 
 <script>
+  // ─── SUPABASE CONFIG ───
+  const SUPABASE_URL = 'https://pghoroonmmmhhglzyfay.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_6fUkFKHHbK5zgS9yzzhyfQ_yfZV8ndQ';
+  const TABLE = 'tiempos';
+
+  async function sbFetch(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      ...options,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        ...(options.headers || {}),
+      },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
   // ─── STATE ───
-  // times: array of { ms, cube }
   const state = {
-    times: JSON.parse(localStorage.getItem('ct_times_v2') || '[]'),
+    times: [],
     status: 'idle',
     startTime: 0,
     elapsed: 0,
@@ -460,17 +358,24 @@
   };
 
   const HOLD_MS = 550;
-  const CUBES = ['2x2','3x3','4x4','5x5'];
+  const CUBES = ['3x3','2x2','4x4','5x5'];
 
   // ─── ELEMENTS ───
-  const display    = document.getElementById('timerDisplay');
-  const hint       = document.getElementById('statusHint');
-  const spHint     = document.getElementById('spacebarHint');
-  const timesList  = document.getElementById('timesList');
-  const clearBtn   = document.getElementById('clearBtn');
+  const display      = document.getElementById('timerDisplay');
+  const hint         = document.getElementById('statusHint');
+  const spHint       = document.getElementById('spacebarHint');
+  const timesList    = document.getElementById('timesList');
+  const clearBtn     = document.getElementById('clearBtn');
   const sidebarTitle = document.getElementById('sidebarTitle');
-  const cubeSelect = document.getElementById('cubeType');
-  const statsPanel = document.getElementById('statsPanel');
+  const cubeSelect   = document.getElementById('cubeType');
+  const statsPanel   = document.getElementById('statsPanel');
+  const syncDot      = document.getElementById('syncDot');
+  const loadingBar   = document.getElementById('loadingBar');
+
+  // ─── SYNC UI ───
+  function setSyncing() { syncDot.className = 'sync-dot syncing'; }
+  function setSynced()  { syncDot.className = 'sync-dot synced'; setTimeout(() => syncDot.className = 'sync-dot', 2000); }
+  function setSyncErr() { syncDot.className = 'sync-dot error'; }
 
   // ─── FORMAT ───
   function fmt(ms) {
@@ -482,15 +387,14 @@
     }
     return (ms / 1000).toFixed(3);
   }
-
   function fmtDisplay(ms) {
     const s = fmt(ms);
     const dot = s.lastIndexOf('.');
-    if (dot === -1) return `${s}`;
+    if (dot === -1) return s;
     return `${s.slice(0, dot)}<span class="timer-ms">.${s.slice(dot+1)}</span>`;
   }
 
-  // ─── AO CALC ───
+  // ─── STATS ───
   function ao(arr, n) {
     if (arr.length < n) return null;
     const slice = arr.slice(-n);
@@ -498,21 +402,72 @@
     const trimmed = sorted.slice(1, -1);
     return trimmed.reduce((a,b) => a+b, 0) / trimmed.length;
   }
-  function mean(arr) {
-    if (!arr.length) return null;
-    return arr.reduce((a,b) => a+b, 0) / arr.length;
+  function mean(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : null; }
+  function best(arr) { return arr.length ? Math.min(...arr) : null; }
+
+  // ─── LOAD FROM SUPABASE ───
+  async function loadTimes() {
+    loadingBar.style.width = '60%';
+    try {
+      const data = await sbFetch(`${TABLE}?order=id.asc&select=id,ms,cube,fecha`);
+      state.times = data || [];
+      renderList();
+      loadingBar.style.width = '100%';
+      setTimeout(() => loadingBar.style.width = '0%', 400);
+    } catch(e) {
+      console.error('Error cargando tiempos:', e);
+      setSyncErr();
+      loadingBar.style.width = '0%';
+      // fallback a localStorage si falla
+      state.times = JSON.parse(localStorage.getItem('ct_times_v2') || '[]');
+      renderList();
+    }
   }
-  function best(arr) {
-    if (!arr.length) return null;
-    return Math.min(...arr);
+
+  // ─── SAVE TO SUPABASE ───
+  async function saveTime(ms, cube) {
+    setSyncing();
+    const fecha = new Date().toISOString();
+    // optimistic: agregar localmente primero
+    state.times.push({ ms, cube, fecha });
+    renderList();
+    try {
+      const [saved] = await sbFetch(TABLE, {
+        method: 'POST',
+        body: JSON.stringify({ ms, cube, fecha }),
+      });
+      // reemplazar el último con el que tiene id real
+      state.times[state.times.length - 1] = saved;
+      setSynced();
+    } catch(e) {
+      console.error('Error guardando tiempo:', e);
+      setSyncErr();
+      // guardar en localStorage como backup
+      localStorage.setItem('ct_times_v2', JSON.stringify(state.times));
+    }
+  }
+
+  // ─── DELETE FROM SUPABASE ───
+  async function deleteTime(idx) {
+    const entry = state.times[idx];
+    state.times.splice(idx, 1);
+    renderList();
+    renderStats();
+    if (!entry.id) return; // era local, no tiene id
+    setSyncing();
+    try {
+      await sbFetch(`${TABLE}?id=eq.${entry.id}`, { method: 'DELETE' });
+      setSynced();
+    } catch(e) {
+      console.error('Error eliminando tiempo:', e);
+      setSyncErr();
+    }
   }
 
   // ─── RENDER LIST ───
   function renderList() {
     const t = state.times;
-    const title = t.length ? `tiempos (${t.length})` : 'tiempos';
-    sidebarTitle.textContent = title;
-
+    sidebarTitle.textContent = t.length ? `tiempos (${t.length})` : 'tiempos';
     if (!t.length) {
       timesList.innerHTML = `
         <div class="empty-state">
@@ -521,15 +476,12 @@
         </div>`;
       return;
     }
-
     const bestVal = best(t.map(x => x.ms));
     timesList.innerHTML = '';
-    const reversed = [...t].reverse();
-    reversed.forEach((entry, i) => {
+    [...t].reverse().forEach((entry, i) => {
       const realIdx = t.length - 1 - i;
-      const isBest  = entry.ms === bestVal;
       const el = document.createElement('div');
-      el.className = 'time-entry' + (isBest ? ' is-best' : '');
+      el.className = 'time-entry' + (entry.ms === bestVal ? ' is-best' : '');
       el.innerHTML = `
         <span class="entry-num">${t.length - i}</span>
         <span class="entry-time">${fmt(entry.ms)}</span>
@@ -538,13 +490,10 @@
       `;
       timesList.appendChild(el);
     });
-
     timesList.querySelectorAll('.entry-del').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
-        const idx = parseInt(btn.dataset.idx);
-        state.times.splice(idx, 1);
-        save(); renderList(); renderStats();
+        deleteTime(parseInt(btn.dataset.idx));
       });
     });
   }
@@ -552,52 +501,34 @@
   // ─── RENDER STATS ───
   function renderStats() {
     statsPanel.innerHTML = '';
-    const hasTimes = state.times.length > 0;
-    if (!hasTimes) {
+    if (!state.times.length) {
       statsPanel.innerHTML = `<div class="empty-state"><span class="empty-icon">📊</span><span>sin tiempos aún</span></div>`;
       return;
     }
-
     CUBES.forEach(cube => {
       const times = state.times.filter(x => x.cube === cube).map(x => x.ms);
       if (!times.length) return;
-
-      const b   = best(times);
-      const a5  = ao(times, 5);
-      const a12 = ao(times, 12);
-      const m   = mean(times);
-
+      const b = best(times), a5 = ao(times,5), a12 = ao(times,12), m = mean(times);
       const section = document.createElement('div');
       section.className = 'stats-cube-section';
       section.innerHTML = `
-        <div class="stats-cube-title">${cube} <span style="color:var(--muted);font-weight:400">(${times.length} solve${times.length !== 1 ? 's' : ''})</span></div>
+        <div class="stats-cube-title">${cube} <span style="color:var(--muted);font-weight:400">(${times.length} solve${times.length!==1?'s':''})</span></div>
         <div class="stats-grid">
-          <div class="stats-card">
-            <span class="stats-card-label">Mejor</span>
-            <span class="stats-card-value pink">${fmt(b)}</span>
-          </div>
-          <div class="stats-card">
-            <span class="stats-card-label">Media</span>
-            <span class="stats-card-value">${fmt(m)}</span>
-          </div>
+          <div class="stats-card"><span class="stats-card-label">Mejor</span><span class="stats-card-value pink">${fmt(b)}</span></div>
+          <div class="stats-card"><span class="stats-card-label">Media</span><span class="stats-card-value">${fmt(m)}</span></div>
           <div class="stats-card">
             <span class="stats-card-label">Ao5</span>
-            <span class="stats-card-value">${a5 !== null ? fmt(a5) : '—'}</span>
-            ${a5 === null ? `<span class="stats-card-sub">necesitás 5 solves</span>` : ''}
+            <span class="stats-card-value">${a5!==null?fmt(a5):'—'}</span>
+            ${a5===null?'<span class="stats-card-sub">necesitás 5 solves</span>':''}
           </div>
           <div class="stats-card">
             <span class="stats-card-label">Ao12</span>
-            <span class="stats-card-value">${a12 !== null ? fmt(a12) : '—'}</span>
-            ${a12 === null ? `<span class="stats-card-sub">necesitás 12 solves</span>` : ''}
+            <span class="stats-card-value">${a12!==null?fmt(a12):'—'}</span>
+            ${a12===null?'<span class="stats-card-sub">necesitás 12 solves</span>':''}
           </div>
-        </div>
-      `;
+        </div>`;
       statsPanel.appendChild(section);
     });
-  }
-
-  function save() {
-    localStorage.setItem('ct_times_v2', JSON.stringify(state.times));
   }
 
   // ─── TABS ───
@@ -613,18 +544,16 @@
     });
   });
 
-  // ─── TIMER LOOP ───
+  // ─── TIMER ───
   function tick() {
     state.elapsed = performance.now() - state.startTime;
     display.innerHTML = fmtDisplay(state.elapsed);
     state.rafId = requestAnimationFrame(tick);
   }
-
   function setClass(cls) {
     display.className = 'timer-display' + (cls ? ' '+cls : '');
     hint.className    = 'status-hint'   + (cls ? ' '+cls : '');
   }
-
   function startHolding() {
     if (state.status === 'timing') { stopTimer(); return; }
     if (state.status !== 'idle') return;
@@ -639,7 +568,6 @@
       }
     }, HOLD_MS);
   }
-
   function releaseHolding() {
     if (state.status === 'holding') {
       clearTimeout(state.holdTimer);
@@ -650,7 +578,6 @@
       startTimer();
     }
   }
-
   function startTimer() {
     state.status    = 'timing';
     state.startTime = performance.now();
@@ -659,62 +586,59 @@
     spHint.textContent = 'toca para detener';
     state.rafId = requestAnimationFrame(tick);
   }
-
   function stopTimer() {
     cancelAnimationFrame(state.rafId);
     state.elapsed = performance.now() - state.startTime;
+    const ms   = Math.round(state.elapsed);
     const cube = cubeSelect.value;
-    state.times.push({ ms: Math.round(state.elapsed), cube });
-    save();
     state.status = 'idle';
     display.innerHTML = fmtDisplay(state.elapsed);
     setClass('');
     hint.textContent = 'mantén espacio presionado para preparar';
     spHint.textContent = 'espacio · toca pantalla en móvil';
-    renderList();
+    saveTime(ms, cube);
     if (state.activeTab === 'estadisticas') renderStats();
   }
 
-  // ─── KEYBOARD ───
-  document.addEventListener('keydown', e => {
-    if (e.code === 'Space' && !e.repeat) { e.preventDefault(); startHolding(); }
-  });
-  document.addEventListener('keyup', e => {
-    if (e.code === 'Space') { e.preventDefault(); releaseHolding(); }
-  });
+  // ─── EVENTS ───
+  document.addEventListener('keydown', e => { if (e.code==='Space'&&!e.repeat){e.preventDefault();startHolding();} });
+  document.addEventListener('keyup',   e => { if (e.code==='Space'){e.preventDefault();releaseHolding();} });
 
-  // ─── TOUCH ───
   const timerArea = document.getElementById('timerArea');
-  timerArea.addEventListener('pointerdown', e => {
-    if (e.target.closest('select, button, img')) return;
-    startHolding();
-  });
-  timerArea.addEventListener('pointerup', e => {
-    if (e.target.closest('select, button, img')) return;
-    releaseHolding();
-  });
+  timerArea.addEventListener('pointerdown', e => { if (!e.target.closest('select,button,img')) startHolding(); });
+  timerArea.addEventListener('pointerup',   e => { if (!e.target.closest('select,button,img')) releaseHolding(); });
 
   // ─── CLEAR ───
-  clearBtn.addEventListener('click', () => {
+  clearBtn.addEventListener('click', async () => {
     if (!state.times.length) return;
     const cube = cubeSelect.value;
     const cubeCount = state.times.filter(x => x.cube === cube).length;
-    const msg = cubeCount < state.times.length
-      ? `¿Limpiar solo los tiempos de ${cube} o todos?\n\nOK = todos | Cancelar = solo ${cube}`
-      : `¿Limpiar todos los tiempos de ${cube}?`;
-    if (confirm(msg)) {
-      state.times = [];
-    } else {
-      state.times = state.times.filter(x => x.cube !== cube);
+    const todos = cubeCount < state.times.length
+      ? confirm(`¿Limpiar solo los tiempos de ${cube} o todos?\n\nOK = todos | Cancelar = solo ${cube}`)
+      : confirm(`¿Limpiar todos los tiempos de ${cube}?`);
+
+    setSyncing();
+    try {
+      if (todos) {
+        await sbFetch(`${TABLE}?id=gte.0`, { method: 'DELETE' });
+        state.times = [];
+      } else {
+        const ids = state.times.filter(x => x.cube === cube && x.id).map(x => x.id);
+        if (ids.length) await sbFetch(`${TABLE}?id=in.(${ids.join(',')})`, { method: 'DELETE' });
+        state.times = state.times.filter(x => x.cube !== cube);
+      }
+      setSynced();
+    } catch(e) {
+      console.error('Error limpiando:', e);
+      setSyncErr();
     }
-    save();
     display.innerHTML = '0<span class="timer-ms">.000</span>';
     renderList();
     renderStats();
   });
 
   // ─── INIT ───
-  renderList();
+  loadTimes();
 </script>
 </body>
 </html>
