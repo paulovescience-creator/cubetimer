@@ -467,6 +467,8 @@
   }
 
   // ─── RENDER LIST ───
+  let visibleCount = 10;
+
   function renderList() {
     const t = state.times;
     sidebarTitle.textContent = t.length ? `tiempos (${t.length})` : 'tiempos';
@@ -480,7 +482,9 @@
     }
     const bestVal = best(t.map(x => x.ms));
     timesList.innerHTML = '';
-    [...t].reverse().forEach((entry, i) => {
+    const reversed = [...t].reverse();
+    const visible = reversed.slice(0, visibleCount);
+    visible.forEach((entry, i) => {
       const realIdx = t.length - 1 - i;
       const el = document.createElement('div');
       el.className = 'time-entry' + (entry.ms === bestVal ? ' is-best' : '');
@@ -492,6 +496,15 @@
       `;
       timesList.appendChild(el);
     });
+    if (t.length > visibleCount) {
+      const btn = document.createElement('button');
+      btn.textContent = `ver más (${t.length - visibleCount} restantes)`;
+      btn.style.cssText = `width:100%;padding:0.75rem;background:none;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:color 0.2s;`;
+      btn.onmouseenter = () => btn.style.color = 'var(--pink)';
+      btn.onmouseleave = () => btn.style.color = 'var(--muted)';
+      btn.onclick = () => { visibleCount += 10; renderList(); };
+      timesList.appendChild(btn);
+    }
     timesList.querySelectorAll('.entry-del').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
@@ -635,6 +648,7 @@
       setSyncErr();
     }
     display.innerHTML = '0<span class="timer-ms">.000</span>';
+    visibleCount = 10;
     renderList();
     renderStats();
   });
