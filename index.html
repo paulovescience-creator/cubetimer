@@ -496,6 +496,15 @@
       `;
       timesList.appendChild(el);
     });
+    if (visibleCount > 10) {
+      const btnMenos = document.createElement('button');
+      btnMenos.textContent = `ver menos`;
+      btnMenos.style.cssText = `width:100%;padding:0.75rem;background:none;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:color 0.2s;`;
+      btnMenos.onmouseenter = () => btnMenos.style.color = 'var(--pink)';
+      btnMenos.onmouseleave = () => btnMenos.style.color = 'var(--muted)';
+      btnMenos.onclick = () => { visibleCount = 10; renderList(); };
+      timesList.appendChild(btnMenos);
+    }
     if (t.length > visibleCount) {
       const btn = document.createElement('button');
       btn.textContent = `ver más (${t.length - visibleCount} restantes)`;
