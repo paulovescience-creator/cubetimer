@@ -333,6 +333,17 @@
   transition: opacity 0.2s;
 }
 .popup-btn:hover { opacity: 0.85; }
+
+    /* RECORDATORIO CADA 10 TIRADAS */
+  function checkCubeReminder() {
+    const sessionTimes = state.times.length;
+    if (sessionTimes > 0 && sessionTimes % 10 === 0) {
+      const currentCube = cubeSelect.value;
+      const seguir = confirm(`¿Seguís usando el ${currentCube} o querés cambiarlo?`);
+      if (!seguir) {
+        popupOverlay.style.display = 'flex';
+      }
+    }
     
     @media (max-width: 680px) {
       main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; min-height: calc(100vh - 100px); }
@@ -698,6 +709,7 @@
     spHint.textContent = 'espacio · toca pantalla en móvil';
     saveTime(ms, cube);
     if (state.activeTab === 'estadisticas') renderStats();
+    checkCubeReminder();
   }
 
   // ─── EVENTS ───
