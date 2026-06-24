@@ -270,7 +270,70 @@
       position: fixed;
       top: 0; left: 0;
     }
-
+    
+    /* ─── POPUP ─── */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.popup {
+  background: var(--surface);
+  border: 1px solid var(--pink-dim);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 320px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 0 40px rgba(244,114,182,0.15);
+}
+.popup-msg {
+  font-size: 0.95rem;
+  color: var(--white);
+  text-align: center;
+  line-height: 1.5;
+}
+.popup-msg span { color: var(--pink); }
+.popup-select {
+  background: var(--surface2);
+  border: 2px solid var(--pink);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  animation: pulseborder 1.5s ease-in-out infinite;
+}
+.popup-select option { background: var(--surface2); }
+@keyframes pulseborder {
+  0%, 100% { border-color: var(--pink); box-shadow: 0 0 0 0 rgba(244,114,182,0.4); }
+  50% { border-color: var(--pink); box-shadow: 0 0 0 6px rgba(244,114,182,0); }
+}
+.popup-btn {
+  background: var(--pink);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 2rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.popup-btn:hover { opacity: 0.85; }
+    
     @media (max-width: 680px) {
       main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; min-height: calc(100vh - 100px); }
       .timer-area { border-right: none; border-bottom: 1px solid var(--border); padding: 3rem 1.5rem; }
@@ -280,6 +343,19 @@
 </head>
 <body>
 
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup">
+    <div class="popup-msg">acordate de seleccionar el cubo que vas a usar, <span>corazón</span> 🩷</div>
+    <select class="popup-select" id="popupCubeSelect">
+      <option value="3x3">3x3</option>
+      <option value="2x2">2x2</option>
+      <option value="4x4">4x4</option>
+      <option value="5x5">5x5</option>
+    </select>
+    <button class="popup-btn" id="popupBtn">¡listo!</button>
+  </div>
+</div>
+  
 <div class="loading-bar" id="loadingBar"></div>
 
 <header>
@@ -662,6 +738,16 @@
     renderStats();
   });
 
+  // ─── POPUP ───
+  const popupOverlay = document.getElementById('popupOverlay');
+  const popupBtn     = document.getElementById('popupBtn');
+  const popupCubeSelect = document.getElementById('popupCubeSelect');
+
+  popupBtn.addEventListener('click', () => {
+    cubeSelect.value = popupCubeSelect.value;
+    popupOverlay.style.display = 'none';
+  });
+  
   // ─── INIT ───
   loadTimes();
 </script>
